@@ -29,20 +29,37 @@ router.get("/get-capacity", async (req, res, next) => {
   }
 });
 
-router.put("/checkin", async (req, res, next) => {
+router.post("/checkin", async (req, res, next) => {
   try {
-    res.json(await attendantsManager.checkIn(req.body.id, req.body.hall));
+    res.json(
+      await attendantsManager.checkIn(req.body.id, req.body.name, req.body.hall)
+    );
   } catch (err) {
     console.error("Error while checking in");
     next(err);
   }
 });
 
-router.put("/checkout", async (req, res, next) => {
+router.post("/checkout", async (req, res, next) => {
   try {
-    res.json(await attendantsManager.checkOut(req.body.id));
+    res.json(
+      await attendantsManager.checkOut(
+        req.body.id,
+        req.body.name,
+        req.body.hall
+      )
+    );
   } catch (err) {
     console.error("Error while checking out");
+    next(err);
+  }
+});
+
+router.post("/add-user", async (req, res, next) => {
+  try {
+    res.json(await attendantsManager.addUser(req.body.id, req.body.name));
+  } catch (err) {
+    console.error("Error while inserting user");
     next(err);
   }
 });
