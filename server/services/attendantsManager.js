@@ -1,10 +1,15 @@
 const db = require("./db");
 const helper = require("../helper");
 
-// TODO: join table with user_list to get names
 const getUserActvity = async (id) => {
   const rows = await db.query(
-    `SELECT * FROM user_activity WHERE user_id="${id}";`
+    `
+      SELECT user_activity.user_id, user_list.user_name, user_activity.hall_name, user_activity.checkin_status, user_activity.activity_time
+      FROM user_activity
+      INNER JOIN user_list
+      ON user_activity.user_id=user_list.user_id
+      AND user_activity.user_id="${id}";
+    `
   );
 
   const data = helper.emptyOrRows(rows);
