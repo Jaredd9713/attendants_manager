@@ -22,9 +22,7 @@ router.get("/get-capacity", async (req, res, next) => {
 
 router.post("/checkin", async (req, res, next) => {
   try {
-    res.json(
-      await attendantsManager.checkIn(req.body.id, req.body.name, req.body.hall)
-    );
+    res.json(await attendantsManager.checkIn(req.body.id, req.body.hall));
   } catch (err) {
     console.error("Error while checking in");
     next(err);
@@ -33,13 +31,7 @@ router.post("/checkin", async (req, res, next) => {
 
 router.post("/checkout", async (req, res, next) => {
   try {
-    res.json(
-      await attendantsManager.checkOut(
-        req.body.id,
-        req.body.name,
-        req.body.hall
-      )
-    );
+    res.json(await attendantsManager.checkOut(req.body.id, req.body.hall));
   } catch (err) {
     console.error("Error while checking out");
     next(err);

@@ -11,8 +11,7 @@ const getUserActvity = async (id) => {
   return data;
 };
 
-// TODO: remove name param
-const checkIn = async (id, name, hall) => {
+const checkIn = async (id, hall) => {
   const queryUserInfo = await db.query(
     `SELECT * FROM user_list WHERE user_id = "${id}";`
   );
@@ -59,7 +58,7 @@ const checkIn = async (id, name, hall) => {
   }
 
   await db.query(
-    `INSERT INTO user_activity (user_id, user_name, hall_name, checkin_status, activity_time) VALUES ("${id}", "${name}", "${hall}", 1, now());`
+    `INSERT INTO user_activity (user_id, hall_name, checkin_status, activity_time) VALUES ("${id}", "${hall}", 1, now());`
   );
 
   await db.query(
@@ -73,8 +72,7 @@ const checkIn = async (id, name, hall) => {
   };
 };
 
-// TODO: remove name param
-const checkOut = async (id, name, hall) => {
+const checkOut = async (id, hall) => {
   const queryUserInfo = await db.query(
     `SELECT * FROM user_list WHERE user_id = "${id}";`
   );
@@ -101,7 +99,7 @@ const checkOut = async (id, name, hall) => {
   const data = helper.emptyOrRows(rows);
 
   await db.query(
-    `INSERT INTO user_activity (user_id, user_name, hall_name, checkin_status, activity_time) VALUES ("${id}", "${name}", "${hall}", 0, now());`
+    `INSERT INTO user_activity (user_id, hall_name, checkin_status, activity_time) VALUES ("${id}", "${hall}", 0, now());`
   );
 
   await db.query(
