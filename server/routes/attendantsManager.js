@@ -2,18 +2,9 @@ const express = require("express");
 const router = express.Router();
 const attendantsManager = require("../services/attendantsManager");
 
-router.get("/list-attendants", async (req, res, next) => {
+router.get("/get-user-activity", async (req, res, next) => {
   try {
-    res.json(await attendantsManager.getList());
-  } catch (err) {
-    console.error("Error while getting attendants list");
-    next(err);
-  }
-});
-
-router.get("/get-user", async (req, res, next) => {
-  try {
-    res.json(await attendantsManager.getUser(req.body.id));
+    res.json(await attendantsManager.getUserActvity(req.body.id));
   } catch (err) {
     console.error("Error while getting searching user");
     next(err);

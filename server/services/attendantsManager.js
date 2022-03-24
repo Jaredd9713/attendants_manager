@@ -1,21 +1,37 @@
 const db = require("./db");
 const helper = require("../helper");
 
-const getList = async () => {
-  const rows = await db.query(`SELECT * FROM user_list;`);
+// TODO: join table with user_list to get names
+const getUserActvity = async (id) => {
+  const rows = await db.query(
+    `SELECT * FROM user_activity WHERE user_id="${id}";`
+  );
 
   const data = helper.emptyOrRows(rows);
   return data;
 };
 
-const getUser = async (id) => {
-  const rows = await db.query(`SELECT * FROM user_list WHERE user_id="${id}";`);
-
-  const data = helper.emptyOrRows(rows);
-  return data;
-};
-
+// TODO: remove name param
 const checkIn = async (id, name, hall) => {
+  const queryUserInfo = await db.query(
+    `SELECT * FROM user_list WHERE user_id = "${id}";`
+  );
+
+  if (queryUserInfo.length === 0) {
+    return {
+      statusCode: 003,
+      message: "User not found",
+    };
+  }
+
+  [{ checkin_status }] = queryUserInfo;
+  if (checkin_status === 1) {
+    return {
+      statusCode: 002,
+      message: `User not checked out from hall, please checkout from hall ${hall}`,
+    };
+  }
+
   const rows = await db.query(
     `UPDATE user_list SET hall=${hall}, checkin_status=1 WHERE user_id="${id}";`
   );
@@ -25,13 +41,17 @@ const checkIn = async (id, name, hall) => {
   if (data.changedRows === 0) {
     return {
       data: data,
-      statusCode: 1,
-      message: "User not found or has already checked in",
+      statusCode: 001,
+      message: "User has already checked in",
     };
   }
 
   await db.query(
     `INSERT INTO user_activity (user_id, user_name, hall, checkin_status, activity_time) VALUES ("${id}", "${name}", ${hall}, 1, now());`
+  );
+
+  await db.query(
+    `UPDATE hall SET hall_capacity = hall_capacity + 1 WHERE hall_number=${hall};`
   );
 
   return {
@@ -41,7 +61,19 @@ const checkIn = async (id, name, hall) => {
   };
 };
 
+// TODO: remove name param
 const checkOut = async (id, name, hall) => {
+  const queryUserInfo = await db.query(
+    `SELECT * FROM user_list WHERE user_id = "${id}";`
+  );
+
+  if (queryUserInfo.length === 0) {
+    return {
+      statusCode: 003,
+      message: "User not found",
+    };
+  }
+
   const rows = await db.query(
     `UPDATE user_list SET hall=null, checkin_status=0 WHERE user_id="${id}";`
   );
@@ -52,12 +84,16 @@ const checkOut = async (id, name, hall) => {
     return {
       data: data,
       statusCode: 1,
-      message: "User not found or has already checked out",
+      message: "User has already checked out",
     };
   }
 
   await db.query(
     `INSERT INTO user_activity (user_id, user_name, hall, checkin_status, activity_time) VALUES ("${id}", "${name}", ${hall}, 0, now());`
+  );
+
+  await db.query(
+    `UPDATE hall SET hall_capacity = hall_capacity - 1 WHERE hall_number=${hall};`
   );
 
   return {
@@ -90,8 +126,7 @@ const addUser = async (id, name) => {
 };
 
 module.exports = {
-  getList,
-  getUser,
+  getUserActvity,
   checkIn,
   checkOut,
   getCapacity,
