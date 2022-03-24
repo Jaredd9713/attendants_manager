@@ -18,6 +18,18 @@ const checkIn = async (id, name, hall) => {
   );
   [{ checkin_status, hall_name: currentHall }] = queryUserInfo;
 
+  const queryHallSize = await db.query(
+    `SELECT * FROM hall WHERE hall_name = "${hall}";`
+  );
+  [{ hall_capacity, hall_max_capacity }] = queryHallSize;
+
+  if (hall_capacity === hall_max_capacity) {
+    return {
+      statusCode: "004",
+      message: "Hall full",
+    };
+  }
+
   if (queryUserInfo.length === 0) {
     return {
       statusCode: "003",
@@ -105,7 +117,7 @@ const checkOut = async (id, name, hall) => {
 
 const getCapacity = async (hall) => {
   const rows = await db.query(
-    `SELECT COUNT(hall) as hallCapacity from user_list WHERE hall=${hall};`
+    `SELECT hall_capacity, hall_max_capacity from hall WHERE hall_name="${hall}";`
   );
 
   const data = helper.emptyOrRows(rows);
